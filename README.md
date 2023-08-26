@@ -8,16 +8,13 @@ Built on Docker Client v4.19.0 in MacOS.
 
 With default `.env`, nodeJS server is at `http://localhost:8888` and mongo express at `http://localhost:27017`. 
 
-API Documentation: `http://localhost:8888/api-docs`
-
+API Documentation: `http://localhost:8888/api-docs` <br />
 API and authorization should be working.
 
-API endpoints: `http://localhost:8888/api/v1`
-
+API endpoints: `http://localhost:8888/api/v1` <br />
 Refers to API Documentation for request/response sample and format.
 
-To create Admin User, run `bash develop node run create:admin` (ensure the docker is running).
-
+To create Admin User, run `bash develop node run create:admin` (ensure the docker is running). <br />
 Note: if default `password` not working, enter your password manually instead.
 
 ## Accessing MongoDB
