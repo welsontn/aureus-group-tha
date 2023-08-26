@@ -8,7 +8,8 @@
     "dev": "export ENV=DEV & npx nodemon ./src/app.ts",
     "dev:inspect": "export ENV=DEV & npx nodemon --inspect-brk=0.0.0.0:8888 ./src/app.ts",
     "create:admin": "ts-node  --require tsconfig-paths/register src/db-create-admin.ts",
-    "build": "rimraf ./dist && tsc"
+    "build": "rimraf ./dist && tsc && tsc-alias && npm run cp:openapi",
+    "cp:openapi": "cp ./src/openapi.yaml ./dist/openapi.yaml"
   },
   "keywords": [],
   "author": "",
@@ -47,6 +48,7 @@
     "read": "^2.1.0",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
+    "tsc-alias": "^1.8.7",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.6"
   }
