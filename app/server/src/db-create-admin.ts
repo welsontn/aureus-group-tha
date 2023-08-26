@@ -26,7 +26,7 @@ dbClient.connect().then(async () => {
       firstName: await read({ prompt: "First Name: ", default: 'First' }),
       lastName: await read({ prompt: "Last Name: ", default: 'Last' }),
       email: await read({ prompt: "Email: ", default: 'admin@example.com' }),
-      password: await read({ prompt: "Password (password): ", default: 'password', silent: true }),
+      password: await read({ prompt: "Password (password): ", default: "password", silent: true }),
       role: roleEnum.Values.admin,
     })
     console.log("\n");
