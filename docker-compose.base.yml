@@ -1,0 +1,48 @@
+version: '3.1'
+
+services:
+  node:
+    container_name: aureus-node
+    build: 
+      context: ./app/server
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NODE_VERSION=18.16.1
+      - NODE_PORT=${NODE_PORT}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
+    volumes:
+      - ./app/server:/usr/src/app/server
+      - /usr/src/app/server/node_modules/
+    ports:
+      - ${NODE_PORT}:${NODE_PORT}
+    depends_on:
+      - mongo
+    links:
+        - mongo
+    networks:
+      - aureusnetwork
+
+  mongo:
+    container_name: aureus-mongo
+    image: mongo:6.0-rc-jammy
+    restart: always
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    volumes:
+      - ./data/mongo:/data/db
+      - ./app/mongo/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
+    networks:
+      - aureusnetwork

@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Aureus Group - Take Home Assignment
+  contact:
+    name: Welson
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  description: |
+    API Documentation for Job Portal
+tags:
+  - name: User
+    description: Operations about Users. Users have 'user' role permission assigned.
+  - name: Job
+    description: Operations about Jobs.
+  - name: Admin
+    description: |
+      Operations about Admins. Admin is identical to User but with 'admin' role.  
+      Creating User with 'admin' role requires system admin's access to server.
+servers:
+  - url: 'http://localhost:8888/api/v1'
+    description: localhost server for testing purposes
+paths:
+  '/users/register':
+    post:
+      tags:
+        - User
+      summary: Register a new user
+      description: |
+        Register a new user with email, firstName, lastName and password.
+        Registering user in this way will not return JWT. User will have to login manually.
+      operationId: usersRegister
+      security: 
+        -  {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Register a new user
+        required: true
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Invalid Input
+        '409':
+          description: Email already exist
+  '/users/login':
+    post:
+      tags:
+        - User
+      summary: Login as an user into the system
+      description: Login as an user requiring email and password to be provided
+      operationId: usersLogin
+      security: 
+        -  {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                email:
+                  $ref: "#/components/schemas/Email"
+                password:
+                  $ref: "#/components/schemas/Password"
+        description: Register a new user
+        required: true
+      responses:
+        '200':
+          description: Success with JWT token
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/TokenResponse"
+        '400':
+          description: Invalid Input
+  '/users/profile':
+    get:
+      tags:
+        - User
+      summary: Get User's own personal info
+      description: Get logged in User's own personal info. If user is not logged in, this will rediced to Login Page
+      operationId: usersProfile
+      security:
+        - AccessToken: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+  '/users/applied_jobs':
+    get:
+      tags:
+        - User
+      summary: Get a list of applied jobs
+      description: |
+        Get a list of User's applied jobs without description.
+      operationId: usersAppliedJobs
+      security:
+        - AccessToken: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  jobs:
+                    type: array
+                    description: Description is not included.
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+  '/jobs':
+    get:
+      tags:
+        - Job
+      summary: Get a list of Jobs
+      description: |
+        Get a list of Jobs without description.
+        Inactive jobs are excluded.
+        User is not required to be logged in.
+      operationId: getJobs
+      security:
+        - {}
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  jobs:
+                    type: array
+                    description: Description is not included.
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '400':
+          description: Error
+  '/jobs/{slug}':
+    get:
+      tags:
+        - Job
+      summary: Get job's detail based on Job's slug
+      description: |
+        Get job's detail based on Job's slug.
+      operationId: getJobsDetailBySlug
+      security:
+        - {}
+      parameters: 
+        - $ref: "#/components/parameters/PathSlug"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobWithDescription'
+        '404':
+          description: Job not found
+  '/jobs/{slug}/apply':
+    post:
+      tags:
+        - Job
+      summary: Apply for job for logged in User.
+      description: |
+        Apply for job for logged in User.
+      operationId: applyJobsBySlug
+      security:
+        - AccessToken: []
+      parameters: 
+        - $ref: "#/components/parameters/PathSlug"
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Invalid input or User has already applied
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Job not found
+    
+  '/admin/login':
+    post:
+      tags:
+        - Admin
+      summary: Login as an admin into the system
+      description: Login as an admin requiring email and password to be provided
+      operationId: adminLogin
+      security: 
+        -  {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                email:
+                  $ref: "#/components/schemas/Email"
+                password:
+                  $ref: "#/components/schemas/Password"
+      responses:
+        '200':
+          description: Success with JWT token
+          content: 
+            application/jwt:
+              schema: 
+                type: string
+        '400':
+          description: Invalid Input
+  '/admin/jobs':
+    get:
+      tags:
+        - Admin
+      summary: List of all Jobs
+      description: |
+        List of all Jobs.
+        Inactive jobs are displayed.
+      operationId: adminListJobs
+      security:
+        - AccessToken: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  jobs:
+                    type: array
+                    description: Description is not included.
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    post:
+      tags:
+        - Admin
+      summary: Create a new job
+      description: |
+        Create a new job with image file included in multipart/form-data format
+      operationId: adminCreateJobs
+      requestBody: 
+        description: New job with all of its particular to be added to database
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - json
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Company's image logo file
+                json:
+                  $ref: '#/components/schemas/JobWithDescription'
+        
+      security:
+        - AccessToken: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  jobs:
+                    type: array
+                    description: Description is not included.
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  '/admin/jobs/{id}':
+    delete:
+      tags:
+        - Admin
+      summary: Delete job based on ID
+      description: |
+        Delete job based on ID. Image file will be deleted.
+      operationId: adminDeleteJobsById
+      parameters: 
+        - $ref: "#/components/parameters/PathId"
+      security:
+        - AccessToken: []
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Job not found or already deleted
+
+components:
+  securitySchemes:
+    AccessToken:
+      description: JWT to identify an user
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+  schemas:
+    Email:
+      description: User's email address. This will be system's main way to identify user.
+      type: string
+      format: email
+      example: example@example.com
+    Password:
+      description: User's Password
+      type: string
+      format: password
+      minLength: 8
+      writeOnly: true
+      example: yourpassword
+    Role:
+      description: User's Role indicating their permission levels
+      type: string
+      readOnly: true
+      enum: 
+        - user
+        - admin
+      default: user
+      example: user
+    User:
+      type: object
+      description: User's information
+      required: 
+        - email
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          description: User first name
+          type: string
+          minLength: 1
+          example: John
+        lastName:
+          description: User last name
+          type: string
+          minLength: 1
+          example: Smith
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          $ref: '#/components/schemas/Password'
+        role:
+          $ref: '#/components/schemas/Role'
+    Date:
+      type: string
+      format: date
+      description: Date in YYYY-MM-DD format.
+      example: "2022-11-22"
+    Job:
+      type: object
+      description: |
+        Job posting for users to apply for.
+        Note that Job's description is not included here
+      required: 
+        - title
+        - active
+        - company
+      properties:
+        slug: 
+          type: string
+          description: Job's slug + UID.
+          readOnly: true
+          example: job-name-8341723
+        title: 
+          type: string
+          description: Job's title
+          minLength: 1
+          maxLength: 200
+          example: Job Title
+        imagePath: 
+          type: string
+          description: URL path to fetch this job's image
+          readOnly: true
+          example: path/to/image
+        active: 
+          type: boolean
+          description: |
+            If 'active' is false, jobs won't be displayed on user and not able to apply anymore.
+            User who has applied before 'active' is false will still be able to see under applied job API.
+          default: true
+        postedAt: 
+          $ref: "#/components/schemas/Date"
+        company: 
+          type: string
+          description: Company's name
+          minLength: 1
+          maxLength: 200
+          example: Name of Company
+        salary: 
+          type: number
+          format: currency
+          description: Company's name
+          minimum: 0
+          example: 12345
+
+    JobWithDescription:
+      allOf:
+        - $ref: "#/components/schemas/Job"
+        - type: object
+          description: |
+            Job with description when at Detail page and when submitting Job
+          required: 
+            - description
+          properties:
+            description: 
+              type: string
+              description: Job's description
+              minLength: 1
+              maxLength: 660
+              example: Job's Description lorem ipsum
+
+    TokenResponse:
+      type: object
+      description: JWT Token
+      required: 
+        - token
+      properties:
+        token:
+          description: JWT Token
+          type: string
+          readOnly: true
+
+  parameters: 
+    PathSlug:
+      name: slug
+      in: path
+      schema: 
+        type: string
+      required: true
+      description: |
+        Pretty url (slug)
+    
+    PathId:
+      name: id
+      in: path
+      schema: 
+        type: string
+      required: true
+      description: |
+        Object UUID generated by database
