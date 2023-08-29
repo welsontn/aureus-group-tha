@@ -12,7 +12,7 @@ const jobValidation = {
         jobDTOSchema.shape.slug.parse(params.slug)
 
         next();
-    })
+    }),
 }
 
 

@@ -5,6 +5,8 @@ import ErrorResponse from "#src/utils/errorResponse";
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import userService from "#src/services/userService";
+import { passwordSchema } from "#src/schemas/passwordSchema";
+import { z } from "zod";
 
 const userValidation = {
 
@@ -34,6 +36,19 @@ const userValidation = {
                      .parse(req.body)
 
         // Always create user with "user" role when registering
+        req.body.role = roleEnum.Values.user
+
+        next();
+    }),
+
+    login: asyncHandler( async (req: Request, res: Response, next: NextFunction) => {
+        const body = req.body;
+
+        // validate email & password
+        req.body.email = userDTOSchema.shape.email.parse(body.email)
+        req.body.password = passwordSchema.parse(body.password)
+
+        // Attach 'user' role when login
         req.body.role = roleEnum.Values.user
 
         next();

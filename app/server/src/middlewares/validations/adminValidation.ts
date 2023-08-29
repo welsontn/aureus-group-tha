@@ -1,6 +1,8 @@
 import { roleEnum } from "#src/enums/roleEnum";
 import { accessTokenSchema } from "#src/schemas/accessToken";
 import { jobDTOSchema } from "#src/schemas/jobDTO";
+import { passwordSchema } from "#src/schemas/passwordSchema";
+import { userDTOSchema } from "#src/schemas/userDTO";
 import userService from "#src/services/userService";
 import ErrorResponse from "#src/utils/errorResponse";
 import { NextFunction, Request, Response } from "express";
@@ -54,7 +56,6 @@ const adminValidation = {
         next()
     }),
 
-
     deleteJob: asyncHandler( async (req: Request, res: Response, next: NextFunction) => {
         const params = req.params
 
@@ -62,6 +63,19 @@ const adminValidation = {
         z.string().parse(params.id)
 
         next()
+    }),
+
+    login: asyncHandler( async (req: Request, res: Response, next: NextFunction) => {
+        const body = req.body;
+
+        // validate email & password
+        req.body.email = userDTOSchema.shape.email.parse(body.email)
+        req.body.password = passwordSchema.parse(body.password)
+
+        // Attach 'admin' role when login
+        req.body.role = roleEnum.Values.admin
+
+        next();
     }),
 
 }

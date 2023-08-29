@@ -12,9 +12,7 @@ const userLogin = asyncHandler( async (req: Request, res: Response, next: NextFu
 
   const userEmail: string = body.email;
   const userPassword: string = body.password;
-
-  // Limit to 'user' role only
-  const userRole:string = roleEnum.Values.user;
+  const userRole: string = roleEnum.Values.user; // Limit to 'user' role only
 
   // fetch user by email and role
   const userDTOPW = await userService.getByEmailAndRole(userEmail, userRole, true);

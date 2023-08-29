@@ -5,7 +5,7 @@ import { verifyAccessToken } from "#src/middlewares/auth"
 import userValidation from '#src/middlewares/validations/userValidation';
 
 router.post('/register', userValidation.register, userController.register)
-router.post('/login', userController.login)
+router.post('/login', userValidation.login, userController.login)
 
 // below requires access token
 router.use('/', verifyAccessToken, userValidation.userOnly)

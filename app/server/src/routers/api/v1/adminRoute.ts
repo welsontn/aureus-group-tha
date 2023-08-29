@@ -8,7 +8,7 @@ import multerUtil from '#src/utils/multerUtil';
 // multer image middleware
 var imageUpload = multerUtil.uploadJobImage();
 
-router.post('/login', adminController.login)
+router.post('/login', adminValidation.login, adminController.login)
 
 // requires admin access below here
 router.use('/', verifyAccessToken, adminValidation.adminOnly)
